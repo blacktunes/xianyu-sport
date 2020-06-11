@@ -6,7 +6,7 @@ export const serverUrl = 'https://www.feizhouxianyu.cn:8921'
 export function addSport (data) {
   return axios({
     method: 'post',
-    url: `${serverUrl}`,
+    url: `${serverUrl}/addSport`,
     params: {
       user: data.user,
       date: data.date,
@@ -16,4 +16,23 @@ export function addSport (data) {
       fatRatio: data.fatRatio
     }
   })
+}
+
+export function updateSport (data) {
+  return axios({
+    method: 'post',
+    url: `${serverUrl}/updateSport`,
+    params: {
+      user: data.user,
+      date: data.date,
+      walk: data.walk,
+      sport: data.sport,
+      weight: data.weight,
+      fatRatio: data.fatRatio
+    }
+  })
+}
+
+export function getList (data) {
+  return axios.get(`${serverUrl}/getList`)
 }

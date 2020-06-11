@@ -1,5 +1,5 @@
 <template>
-  <transition name="fade" appear>
+  <transition name="right" appear>
     <div class="home-wrapper">
       <i class="cubeic-tag icon" @click="more"></i>
       <div class="home">
@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { addSport } from '../api/store'
+import { addSport, updateSport } from '../api/store'
 
 export default {
   data () {
@@ -50,10 +50,34 @@ export default {
     }
   },
   methods: {
+    uploading () {
+      this.$createToast({
+        txt: '提交中',
+        time: 0,
+        mask: true
+      }).show()
+    },
+    success () {
+      this.walk = false
+      this.sport = false
+      this.weight = ''
+      this.fatRatio = ''
+      this.$createToast({
+        type: 'correct',
+        txt: '提交成功'
+      }).show()
+    },
+    error () {
+      this.$createToast({
+        type: 'error',
+        txt: '未知错误'
+      }).show()
+    },
     more () {
       this.$router.push('/list')
     },
     submit () {
+      this.uploading()
       addSport({
         user: localStorage.getItem('name'),
         date: this.today,
@@ -64,22 +88,48 @@ export default {
       })
         .then(res => {
           if (res.data.code === 0) {
-            this.$createToast({
-              type: 'correct',
-              txt: '提交成功'
-            }).show()
+            this.success()
           } else if (res.data.code === 1) {
-            this.$createToast({
-              type: 'error',
-              txt: '你今天提交过了'
+            this.$createToast().hide()
+            this.$createDialog({
+              type: 'confirm',
+              title: '你今天提交过了',
+              content: '是否覆盖原来的提交？',
+              maskClosable: true,
+              confirmBtn: {
+                text: '是',
+                active: true,
+                disabled: false
+              },
+              cancelBtn: {
+                text: '否',
+                active: false,
+                disabled: false
+              },
+              onConfirm: () => {
+                this.uploading()
+                updateSport({
+                  user: localStorage.getItem('name'),
+                  date: this.today,
+                  walk: this.walk,
+                  sport: this.sport,
+                  weight: this.weight,
+                  fatRatio: this.fatRatio
+                })
+                  .then(res => {
+                    if (res.data.code === 0) {
+                      this.success()
+                    }
+                  })
+                  .catch(() => {
+                    this.error()
+                  })
+              }
             }).show()
           }
         })
         .catch(() => {
-          this.$createToast({
-            type: 'error',
-            txt: '未知错误'
-          }).show()
+          this.error()
         })
     }
   },
@@ -87,7 +137,8 @@ export default {
     if (!localStorage.getItem('name')) {
       this.$router.push('/login')
     } else {
-      this.today = new Date(Date.now() - 1000 * 60 * 60 * 6).toLocaleDateString()
+      const date = new Date(Date.now() - 1000 * 60 * 60 * 6)
+      this.today = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate()
     }
   }
 }
@@ -95,6 +146,9 @@ export default {
 
 <style lang="stylus" scoped>
 .home-wrapper
+  position fixed
+  top 0
+  left 0
   width 100vw
   height 100vh
   .icon
@@ -135,10 +189,10 @@ export default {
       margin-top 24%
       width 50%
 
-.fade-enter-active, .fade-leave-active
-  transition opacity 0.5s
-.fade-enter, .fade-leave-to
-  opacity 0
+.right-enter-active, .right-leave-active
+  transition transform 0.5s
+.right-enter, .right-leave-to
+  transform translate3d(100%, 0, 0)
 
 @keyframes shake
   0%
