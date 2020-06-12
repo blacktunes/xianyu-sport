@@ -157,7 +157,7 @@ export default {
     top 15px
     right 15px
     transform rotate(90deg)
-    animation shake 2s linear infinite
+    animation back-shake 2s linear infinite
   .home
     position fixed
     top 20%
@@ -188,33 +188,4 @@ export default {
     .button
       margin-top 24%
       width 50%
-
-.right-enter-active, .right-leave-active
-  transition transform 0.5s
-.right-enter, .right-leave-to
-  transform translate3d(100%, 0, 0)
-
-@keyframes shake
-  0%
-    transform rotate(90deg)
-  20%
-    transform rotate(90deg)
-  25%
-    transform rotate(75deg)
-  30%
-    transform rotate(90deg)
-  35%
-    transform rotate(105deg)
-  40%
-    transform rotate(90deg)
-  45%
-    transform rotate(75deg)
-  50%
-    transform rotate(90deg)
-  55%
-    transform rotate(105deg)
-  60%
-    transform rotate(90deg)
-  100%
-    transform rotate(90deg)
 </style>

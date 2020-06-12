@@ -9,17 +9,23 @@
       <transition name="fade">
         <cube-scroll class="scroll" ref="scroll" :data="data" v-show="showList">
           <template v-for="item in data">
-            <card :key="item.id">
+            <card :key="item.date">
               <div slot="header" class="header">
-                <div class="user">{{item.user}}</div>
-                <div class="date">{{new Date(item.date).toLocaleDateString()}}</div>
+                <div class="date">{{item.date}}</div>
               </div>
-              <div class="content">
-                <div class="text">{{item.walk === 1 ? '已散步' : '没散步'}}</div>
-                <div class="text">{{item.sport === 1 ? '已运动' : '没运动'}}</div>
-                <div class="text">体重:{{!item.weight || item.weight.length &lt; 1 ? '???kg' : item.weight + 'kg'}}</div>
-                <div class="text">体脂:{{!item.fatRatio || item.fatRatio.length &lt; 1 ? '???%' : item.fatRatio + '%'}}</div>
-              </div>
+              <template v-for="detail in item.list">
+                <card :key="detail.id">
+                  <div slot="header" class="user">
+                    <div class="user">{{detail.user}}</div>
+                  </div>
+                  <div class="content">
+                    <div class="text">{{detail.walk === 1 ? '已散步' : '没散步'}}</div>
+                    <div class="text">{{detail.sport === 1 ? '已运动' : '没运动'}}</div>
+                    <div class="text">体重:{{!detail.weight || detail.weight.length &lt; 1 ? '???kg' : detail.weight + 'kg'}}</div>
+                    <div class="text">体脂:{{!detail.fatRatio || detail.fatRatio.length &lt; 1 ? '???%' : detail.fatRatio + '%'}}</div>
+                  </div>
+                </card>
+              </template>
             </card>
           </template>
         </cube-scroll>
@@ -51,14 +57,30 @@ export default {
   created () {
     getList()
       .then(res => {
-        this.data = res.data
+        const temp = {}
+        const data = []
+        res.data.forEach(item => {
+          const date = new Date(item.date).toLocaleDateString()
+          if (temp[date]) {
+            temp[date].list.push(item)
+          } else {
+            temp[date] = {
+              date: date,
+              list: [item]
+            }
+          }
+        })
+        for (const i in temp) {
+          data.push(temp[i])
+        }
+        this.data = data
         this.showList = true
-        console.log(this.data)
         if (this.data.length < 1) {
           this.listEmpty = true
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err)
         this.$createToast({
           type: 'error',
           txt: '未知错误'
@@ -76,7 +98,7 @@ export default {
   font-size 25px
   top 15px
   left 15px
-  animation shake 4s linear infinite
+  animation icon-shake 4s linear infinite
 .loading
   position fixed
   top 50vh
@@ -90,44 +112,19 @@ export default {
   width 100vw
   .header
     padding 5px
-    .user
-      display inline-block
-      font-size 20px
-      margin-right 15px
     .date
       display inline-block
-      font-size 18px
+      font-size 20px
       color #aaa
       line-height 100%
+  .user
+    display inline-block
+    font-size 18px
+    padding 2px 5px
   .content
     display flex
     flex-wrap wrap
     .text
       padding 10px 5px
-
-.left-leave-active, .left-enter-active
-  transition transform 0.5s
-.left-enter, .left-leave-to
-  transform translate3d(-100%, 0, 0)
-
-.fade-enter-active, .fade-leave-active
-  transition opacity 0.5s
-.fade-enter, .fade-leave-to
-  opacity 0
-
-@keyframes shake
-  0%
-    transform translate(0, 0)
-  20%
-    transform translate(0, 0)
-  25%
-    transform translate(-15%, 0)
-  30%
-    transform translate(0, 0)
-  35%
-    transform translate(-15%, 0)
-  40%
-    transform translate(0, 0)
-  100%
-    transform translate(0, 0)
+      font-size 15px
 </style>
